@@ -47,14 +47,13 @@ const ProductPage = () => {
 
   // Destructure the product nutriments per 100g
   const {
-    energy_value,          // Energy in kJ per 100g
+    energy_value,            // Energy in kJ per 100g
     fat_100g,                // Total fat per 100g
     saturated_fat_100g,      // Saturated fat per 100g
     carbohydrates_100g,      // Total carbohydrates per 100g
     sugars_100g,             // Sugars per 100g
     fiber_100g,              // Dietary fiber per 100g
     proteins_100g,           // Proteins per 100g
-    salt_100g,               // Salt per 100g
     sodium_100g              // Sodium per 100g
   } = product.nutriments || {};
 
