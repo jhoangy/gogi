@@ -42,19 +42,26 @@ const ProductPage = () => {
   }
 
   if (error || !product) {
-    return <div>Product not found</div>;
+    return (
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <p>Product not found.</p>
+        <button onClick={handleBackToSearch} style={{ marginTop: '20px', padding: '10px 20px' }}>
+          Back to Search
+        </button>
+      </div>
+    );
   }
 
   // Destructure the product nutriments per 100g
   const {
-    energy_value,            // Energy in kJ per 100g
-    fat_100g,                // Total fat per 100g
-    saturated_fat_100g,      // Saturated fat per 100g
-    carbohydrates_100g,      // Total carbohydrates per 100g
-    sugars_100g,             // Sugars per 100g
-    fiber_100g,              // Dietary fiber per 100g
-    proteins_100g,           // Proteins per 100g
-    sodium_100g              // Sodium per 100g
+    'energy-kcal_100g': energyKcal100g, // Energy in kJ per 100g
+    fat_100g,                           // Total fat per 100g
+    saturated_fat_100g,                 // Saturated fat per 100g
+    carbohydrates_100g,                 // Total carbohydrates per 100g
+    sugars_100g,                        // Sugars per 100g
+    fiber_100g,                         // Dietary fiber per 100g
+    proteins_100g,                      // Proteins per 100g
+    sodium_100g                         // Sodium per 100g
   } = product.nutriments || {};
 
 
@@ -72,7 +79,7 @@ const ProductPage = () => {
       {/* Display Nutrition Information */}
       <h2>Nutrition Information (per 100g)</h2>
       <ul>
-        {energy_value && <li><strong>Energy:</strong> {formatValue(energy_value)} kcal</li>}
+        {energyKcal100g && <li><strong>Energy:</strong> {formatValue(energyKcal100g)} kcal</li>}
         {fat_100g && <li><strong>Fat:</strong> {formatValue(fat_100g)} g</li>}
         {saturated_fat_100g && <li><strong>Saturated Fat:</strong> {formatValue(saturated_fat_100g)} g</li>}
         {carbohydrates_100g && <li><strong>Carbohydrates:</strong> {formatValue(carbohydrates_100g)} g</li>}
