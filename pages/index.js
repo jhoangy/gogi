@@ -24,12 +24,15 @@ const Home = () => {
       if (videoRef.current) {
         console.log("Video element available:", videoRef.current);
 
-        // Test camera access directly
-        navigator.mediaDevices.getUserMedia({ video: true })
+        // Access camera stream
+        navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } } // Back camera
+        })
           .then(stream => {
             if (videoRef.current) {
               videoRef.current.srcObject = stream;
               streamRef.current = stream; // Save the stream reference
+              videoRef.current.setAttribute('playsinline', 'true'); // Ensure playsinline for iOS Safari
               console.log("Camera stream set to video element.");
             } else {
               console.error("Video element reference is null or undefined.");
@@ -39,6 +42,7 @@ const Home = () => {
             console.error("Error accessing camera:", err);
           });
 
+        // Initialize Quagga for barcode detection
         Quagga.init({
           inputStream: {
             name: "Live",
@@ -67,6 +71,7 @@ const Home = () => {
           if (result && result.codeResult && result.codeResult.code) {
             const scannedCode = result.codeResult.code;
             setBarcode(scannedCode);
+            
             // Stop Quagga and camera when a barcode is detected
             if (Quagga) {
               console.log("Stopping Quagga after detecting barcode:", scannedCode);
@@ -150,7 +155,7 @@ const Home = () => {
               style={{ width: '100%', height: 'auto', border: '1px solid #ddd' }}
               autoPlay
               muted
-              playsInline
+              playsInline // Add playsInline for iOS Safari support
             />
             {/* Always show "Scanning..." text while camera is active */}
             <div
