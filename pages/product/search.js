@@ -7,6 +7,8 @@ const Search = () => {
   const [barcode, setBarcode] = useState('');
   const [cameraActive, setCameraActive] = useState(false);
   const [recipeQuery, setRecipeQuery] = useState(''); // State for recipe search
+  const [recipes, setRecipes] = useState([]); // State for storing recipes
+  const [showPopup, setShowPopup] = useState(false); // State for controlling popup display
   const videoRef = useRef(null); // Reference to the video element
   const router = useRouter();
   const streamRef = useRef(null); // Reference to the camera stream
@@ -22,15 +24,26 @@ const Search = () => {
   const handleRecipeSubmit = async () => {
     if (recipeQuery) {
       try {
-        // Replace with your own API URL and Key (Edamam example used here)
+        // Replace with your own API URL and Key (Edamam example used here) REMOVE BEFORE PUSHING
         const response = await fetch(
-          `https://api.edamam.com/search?q=${recipeQuery}&app_id=YOUR_APP_ID&app_key=YOUR_APP_KEY`
+          `https://api.edamam.com/search?q=${recipeQuery}&app_id=0114207c&app_key=00ebfc56e4c59d4a49311979e2122efc`
         );
         const data = await response.json();
 
         if (data.hits && data.hits.length > 0) {
-          const recipe = data.hits[0].recipe; // Get the first recipe result
-          console.log('Ingredients:', recipe.ingredientLines); // Log the ingredients to the console
+          const retrievedRecipes = data.hits.map(hit => {
+            const recipe = hit.recipe;
+            const caloriesPerServing = recipe.calories / recipe.yield; // Divide calories by yield
+            return {
+              name: recipe.label,
+              caloriesPerServing: caloriesPerServing.toFixed(2),
+              totalWeight: recipe.totalWeight,
+              yield: recipe.yield,
+              image: recipe.image
+            };
+          });
+          setRecipes(retrievedRecipes);
+          setShowPopup(true); // Show the popup with the recipes
         } else {
           console.log('No recipe found for the query.');
         }
@@ -204,6 +217,53 @@ const Search = () => {
           </div>
         )}
       </div>
+
+      {/* Popup modal to display recipes */}
+      {showPopup && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#fff',
+              padding: '20px',
+              borderRadius: '8px',
+              width: '80%',
+              maxHeight: '80%',
+              overflowY: 'auto',
+            }}
+          >
+            <h2>Recipe Results</h2>
+            <ul>
+              {recipes.map((recipe, index) => (
+                <li key={index} style={{ marginBottom: '10px' }}>
+                  <h3>{recipe.name}</h3>
+                  <p><strong>Calories per Serving:</strong> {recipe.caloriesPerServing} kcal</p>
+                  <p><strong>Total Weight:</strong> {recipe.totalWeight.toFixed(2)} g</p>
+                  <p><strong>Yield:</strong> {recipe.yield}</p>
+                  <img src={recipe.image} alt={recipe.name} style={{ width: '100px', height: '100px' }} />
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => setShowPopup(false)}
+              style={{ padding: '10px 20px', marginTop: '20px' }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
