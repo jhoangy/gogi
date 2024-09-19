@@ -1,49 +1,39 @@
 // pages/product/search.js
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Quagga from 'quagga'; // Import QuaggaJS for camera scanning
+import Quagga from 'quagga';
 
 const Search = () => {
   const [barcode, setBarcode] = useState('');
   const [cameraActive, setCameraActive] = useState(false);
-  const [recipeQuery, setRecipeQuery] = useState(''); // State for recipe search
-  const [recipes, setRecipes] = useState([]); // State for storing recipes
-  const [showPopup, setShowPopup] = useState(false); // State for controlling popup display
-  const videoRef = useRef(null); // Reference to the video element
+  const [recipeQuery, setRecipeQuery] = useState('');
+  const [userRecipe, setUserRecipe] = useState('');
+  const [nutritionResults, setNutritionResults] = useState(null);
+  const [recipes, setRecipes] = useState([]);
+  const [nutritionPopupVisible, setNutritionPopupVisible] = useState(false);
+  const [recipePopupVisible, setRecipePopupVisible] = useState(false);
+  const videoRef = useRef(null);
   const router = useRouter();
-  const streamRef = useRef(null); // Reference to the camera stream
+  const streamRef = useRef(null);
+  const [yieldValue, setYieldValue] = useState(1);
 
-  // Function to handle barcode search
   const handleBarcodeSubmit = () => {
     if (barcode) {
       router.push(`/product/barcode?code=${barcode}`);
     }
   };
 
-  // Function to handle recipe search
   const handleRecipeSubmit = async () => {
     if (recipeQuery) {
       try {
-        // Replace with your own API URL and Key (Edamam example used here) REMOVE BEFORE PUSHING
         const response = await fetch(
           `https://api.edamam.com/search?q=${recipeQuery}&app_id=0114207c&app_key=00ebfc56e4c59d4a49311979e2122efc`
         );
         const data = await response.json();
-
+        console.log(data);
         if (data.hits && data.hits.length > 0) {
-          const retrievedRecipes = data.hits.map(hit => {
-            const recipe = hit.recipe;
-            const caloriesPerServing = recipe.calories / recipe.yield; // Divide calories by yield
-            return {
-              name: recipe.label,
-              caloriesPerServing: caloriesPerServing.toFixed(2),
-              totalWeight: recipe.totalWeight,
-              yield: recipe.yield,
-              image: recipe.image
-            };
-          });
-          setRecipes(retrievedRecipes);
-          setShowPopup(true); // Show the popup with the recipes
+          setRecipes(data.hits.map(hit => hit.recipe));
+          setRecipePopupVisible(true);
         } else {
           console.log('No recipe found for the query.');
         }
@@ -53,46 +43,74 @@ const Search = () => {
     }
   };
 
+  const handleUserRecipeSubmit = async () => {
+    if (userRecipe) {
+      const ingredients = userRecipe.split('\n').map(ingredient => ingredient.trim()).filter(Boolean);
+      if (ingredients.length === 0) {
+        console.error('No valid ingredients provided');
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `https://api.edamam.com/api/nutrition-details?app_id=09797d77&app_key=8c815a6c8a44e6929f8918b3794c1440`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ingr: ingredients }),
+          }
+        );
+        const data = await response.json();
+        setNutritionResults(data);
+        setNutritionPopupVisible(true);
+      } catch (error) {
+        console.error('Error fetching nutrition analysis:', error);
+      }
+    }
+  };
+
+  const handlePopupClose = () => {
+    setNutritionPopupVisible(false);
+    setRecipePopupVisible(false);
+  };
+
   const startScanner = () => {
-    setCameraActive(true); // Activate the camera
+    setCameraActive(true);
   };
 
   useEffect(() => {
     if (cameraActive) {
       if (videoRef.current) {
-        // Access camera stream
-        navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } } // Back camera
-        })
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
           .then(stream => {
             if (videoRef.current) {
               videoRef.current.srcObject = stream;
-              streamRef.current = stream; // Save the stream reference
-              videoRef.current.setAttribute('playsinline', 'true'); // Ensure playsinline for iOS Safari
-            } else {
-              console.error("Video element reference is null or undefined.");
+              streamRef.current = stream;
+              videoRef.current.setAttribute('playsinline', 'true');
+              videoRef.current.play();
             }
           })
           .catch(err => {
             console.error("Error accessing camera:", err);
           });
 
-        // Initialize Quagga for barcode detection
         Quagga.init({
           inputStream: {
             name: "Live",
             type: "LiveStream",
-            target: videoRef.current, // Pass video reference
+            target: videoRef.current,
             constraints: {
               width: { min: 640 },
               height: { min: 480 },
-              facingMode: 'environment', // Use back camera
+              facingMode: 'environment',
             },
           },
           decoder: {
-            readers: ['ean_reader'], // EAN reader for barcodes
+            readers: ['ean_reader'],
           },
-          locate: true, // Auto-locate barcodes
+          locate: true,
         }, (err) => {
           if (err) {
             console.error("Quagga initialization failed:", err);
@@ -104,34 +122,17 @@ const Search = () => {
         Quagga.onDetected((result) => {
           if (result && result.codeResult && result.codeResult.code) {
             const scannedCode = result.codeResult.code;
-
-            // Stop Quagga and camera when a barcode is detected
-            if (Quagga) {
-              try {
-                Quagga.stop();
-              } catch (error) {
-                console.error("Error stopping Quagga:", error);
-              }
-            }
+            Quagga.stop();
             if (streamRef.current) {
-              streamRef.current.getTracks().forEach(track => track.stop()); // Stop camera stream
+              streamRef.current.getTracks().forEach(track => track.stop());
             }
-            setCameraActive(false); // Deactivate camera
-
-            // Redirect to the barcode page
+            setCameraActive(false);
             router.push(`/product/barcode?code=${scannedCode}`);
-          }
-        });
-
-        Quagga.onProcessed((result) => {
-          if (result) {
-            console.log("Processing frame:", result);
           }
         });
       }
     }
 
-    // Cleanup when the component unmounts or camera is turned off
     return () => {
       if (Quagga && Quagga.initialized) {
         try {
@@ -141,7 +142,7 @@ const Search = () => {
         }
       }
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop()); // Stop camera stream
+        streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
   }, [cameraActive]);
@@ -150,7 +151,24 @@ const Search = () => {
     <div style={{ textAlign: 'center' }}>
       <h1>Search Product</h1>
 
-      {/* Input field for barcode entry */}
+      <button onClick={startScanner} style={{ padding: '10px 20px', marginBottom: '20px' }}>
+        {cameraActive ? 'Scanning...' : 'Scan Barcode with Camera'}
+      </button>
+
+      {cameraActive && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          <video
+            ref={videoRef}
+            style={{
+              width: '100%',
+              maxWidth: '600px',
+              height: 'auto',
+              display: cameraActive ? 'block' : 'none',
+            }}
+          />
+        </div>
+      )}
+
       <input
         type="text"
         value={barcode}
@@ -158,14 +176,10 @@ const Search = () => {
         placeholder="Enter a barcode"
         style={{ padding: '10px', marginBottom: '20px', width: '80%' }}
       />
-      <br />
-
-      {/* Submit button for barcode search */}
       <button onClick={handleBarcodeSubmit} style={{ padding: '10px 20px', marginBottom: '20px' }}>
         Search Product
       </button>
 
-      {/* Recipe Search Section */}
       <h2>Search for Recipe</h2>
       <input
         type="text"
@@ -174,93 +188,76 @@ const Search = () => {
         placeholder="Enter a recipe name"
         style={{ padding: '10px', marginBottom: '20px', width: '80%' }}
       />
-      <br />
-
-      {/* Submit button for recipe search */}
       <button onClick={handleRecipeSubmit} style={{ padding: '10px 20px', marginBottom: '20px' }}>
         Search Recipe
       </button>
 
-      {/* Camera Access and Barcode Scanner */}
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={startScanner} style={{ padding: '10px 20px' }}>
-          {cameraActive ? 'Scanning...' : 'Scan Barcode with Camera'}
-        </button>
+      <h2>Submit Your Recipe</h2>
 
-        {/* Video element for displaying the camera stream */}
-        {cameraActive && (
-          <div style={{ position: 'relative', marginTop: '20px' }}>
-            <video
-              ref={videoRef}
-              style={{ width: '100%', height: 'auto', border: '1px solid #ddd' }}
-              autoPlay
-              muted
-              playsInline
-            />
-            {/* Always show "Scanning..." text while camera is active */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '0',
-                left: '0',
-                right: '0',
-                bottom: '0',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                color: '#fff',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              }}
-            >
-              <span>Scanning...</span>
-            </div>
-          </div>
-        )}
+      <textarea
+        value={userRecipe}
+        onChange={(e) => setUserRecipe(e.target.value)}
+        placeholder="Enter your recipe ingredients"
+        rows={5}
+        style={{ padding: '10px', marginBottom: '10px', width: '80%', resize: 'vertical' }}
+      />
+
+      <label style={{ display: 'block', marginBottom: '5px' }}>Yield</label>
+      <input
+        type="number"
+        value={yieldValue}
+        onChange={(e) => setYieldValue(e.target.value)}
+        style={{ padding: '10px', marginBottom: '10px', width: '4ch' }}
+        min="1"
+        max="9999"
+      />
+
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <button onClick={handleUserRecipeSubmit} style={{ padding: '10px 20px' }}>
+          Submit Recipe
+        </button>
       </div>
 
-      {/* Popup modal to display recipes */}
-      {showPopup && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: '#fff',
-              padding: '20px',
-              borderRadius: '8px',
-              width: '80%',
-              maxHeight: '80%',
-              overflowY: 'auto',
-            }}
-          >
-            <h2>Recipe Results</h2>
-            <ul>
-              {recipes.map((recipe, index) => (
-                <li key={index} style={{ marginBottom: '10px' }}>
-                  <h3>{recipe.name}</h3>
-                  <p><strong>Calories per Serving:</strong> {recipe.caloriesPerServing} kcal</p>
-                  <p><strong>Total Weight:</strong> {recipe.totalWeight.toFixed(2)} g</p>
-                  <p><strong>Yield:</strong> {recipe.yield}</p>
-                  <img src={recipe.image} alt={recipe.name} style={{ width: '100px', height: '100px' }} />
-                </li>
-              ))}
-            </ul>
-            <button
-              onClick={() => setShowPopup(false)}
-              style={{ padding: '10px 20px', marginTop: '20px' }}
-            >
-              Close
-            </button>
+      {nutritionPopupVisible && (
+        <div className="popup" onClick={handlePopupClose} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1000 }}>
+          <div className="popup-content" onClick={e => e.stopPropagation()} style={{ background: '#fff', margin: 'auto', padding: '20px', borderRadius: '5px', width: '80%', maxWidth: '500px', height: 'auto', overflowY: 'auto', position: 'relative', top: '50%', transform: 'translateY(-50%)' }}>
+            <h2>Nutritional Analysis</h2>
+            <button onClick={handlePopupClose} style={{ position: 'absolute', top: '10px', right: '10px' }}>Close</button>
+            <div>
+              <p><strong>Calories:</strong> {(nutritionResults.calories / yieldValue).toFixed(2)}</p>
+              <p><strong>Fat:</strong> {(nutritionResults.totalNutrients?.FAT?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.FAT?.unit}</p>
+              <p><strong>Carbohydrates:</strong> {(nutritionResults.totalNutrients?.CHOCDF?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.CHOCDF?.unit}</p>
+              <p><strong>Protein:</strong> {(nutritionResults.totalNutrients?.PROCNT?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.PROCNT?.unit}</p>
+              <p><strong>Sodium:</strong> {(nutritionResults.totalNutrients?.NA?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.NA?.unit}</p>
+              <p><strong>Sugar:</strong> {(nutritionResults.totalNutrients?.SUGAR?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.SUGAR?.unit}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {recipePopupVisible && (
+        <div className="popup" onClick={handlePopupClose} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1000 }}>
+          <div className="popup-content" onClick={e => e.stopPropagation()} style={{ background: '#fff', margin: 'auto', padding: '20px', borderRadius: '5px', width: '80%', maxWidth: '500px', height: 'auto', overflowY: 'scroll', position: 'relative', top: '50%', transform: 'translateY(-50%)' }}>
+            <h2>Recipes</h2>
+            <button onClick={handlePopupClose} style={{ position: 'absolute', top: '10px', right: '10px' }}>Close</button>
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              {recipes.map((recipe, index) => {
+                const servings = recipe.yield || 1; // Get yield from API
+
+                return (
+                  <div key={index} style={{ marginBottom: '15px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
+                    <h3>{recipe.label}</h3>
+                    <img src={recipe.image} alt={recipe.label} style={{ display: 'block', margin: '0 auto', width: '50%', height: 'auto', marginBottom: '10px' }} />
+                    <p><strong>Calories:</strong> {(recipe.calories / servings).toFixed(2)}</p>
+                    <p><strong>Fat:</strong> {recipe.totalNutrients?.FAT?.quantity ? (recipe.totalNutrients.FAT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.FAT?.unit}</p>
+                    <p><strong>Carbohydrates:</strong> {recipe.totalNutrients?.CHOCDF?.quantity ? (recipe.totalNutrients.CHOCDF.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.CHOCDF?.unit}</p>
+                    <p><strong>Protein:</strong> {recipe.totalNutrients?.PROCNT?.quantity ? (recipe.totalNutrients.PROCNT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.PROCNT?.unit}</p>
+                    <p><strong>Sodium:</strong> {recipe.totalNutrients?.NA?.quantity ? (recipe.totalNutrients.NA.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.NA?.unit}</p>
+                    <p><strong>Sugar:</strong> {recipe.totalNutrients?.SUGAR?.quantity ? (recipe.totalNutrients.SUGAR.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.SUGAR?.unit}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
