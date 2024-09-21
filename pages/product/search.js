@@ -63,6 +63,7 @@ const Search = () => {
           }
         );
         const data = await response.json();
+        console.log(data);
         setNutritionResults(data);
         setNutritionPopupVisible(true);
       } catch (error) {
@@ -226,6 +227,7 @@ const Search = () => {
             <div>
               <p><strong>Calories:</strong> {(nutritionResults.calories / yieldValue).toFixed(2)}</p>
               <p><strong>Fat:</strong> {(nutritionResults.totalNutrients?.FAT?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.FAT?.unit}</p>
+              <p><strong>Fiber:</strong> {(nutritionResults.totalNutrients?.FIBTG?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.FIBTG?.unit}</p>
               <p><strong>Carbohydrates:</strong> {(nutritionResults.totalNutrients?.CHOCDF?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.CHOCDF?.unit}</p>
               <p><strong>Protein:</strong> {(nutritionResults.totalNutrients?.PROCNT?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.PROCNT?.unit}</p>
               <p><strong>Sodium:</strong> {(nutritionResults.totalNutrients?.NA?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.NA?.unit}</p>
@@ -250,6 +252,7 @@ const Search = () => {
                     <img src={recipe.image} alt={recipe.label} style={{ display: 'block', margin: '0 auto', width: '50%', height: 'auto', marginBottom: '10px' }} />
                     <p><strong>Calories:</strong> {(recipe.calories / servings).toFixed(2)}</p>
                     <p><strong>Fat:</strong> {recipe.totalNutrients?.FAT?.quantity ? (recipe.totalNutrients.FAT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.FAT?.unit}</p>
+                    <p><strong>Fiber:</strong> {recipe.totalNutrients?.FIBTG?.quantity ? (recipe.totalNutrients.FIBTG.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.FIBTG?.unit}</p>
                     <p><strong>Carbohydrates:</strong> {recipe.totalNutrients?.CHOCDF?.quantity ? (recipe.totalNutrients.CHOCDF.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.CHOCDF?.unit}</p>
                     <p><strong>Protein:</strong> {recipe.totalNutrients?.PROCNT?.quantity ? (recipe.totalNutrients.PROCNT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.PROCNT?.unit}</p>
                     <p><strong>Sodium:</strong> {recipe.totalNutrients?.NA?.quantity ? (recipe.totalNutrients.NA.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.NA?.unit}</p>
