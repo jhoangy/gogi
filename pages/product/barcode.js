@@ -1,20 +1,29 @@
 // pages/product/barcode.js
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import { MealsContext } from '../../context/MealsContext'; // Import MealsContext
 
 const ProductPage = () => {
   const router = useRouter();
-  const { code } = router.query; // Get the 'code' query parameter
+  const { code, mealType } = router.query; // Get the 'code' and 'mealType' query parameters
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [showDebug, setShowDebug] = useState(false); // State to toggle debug view
+  const [selectedMeal, setSelectedMeal] = useState('Breakfast'); // Default meal type
+  const [quantity, setQuantity] = useState(100); // Default quantity in grams
+
+  const { addFoodToMeal } = useContext(MealsContext); // Use context to get addFoodToMeal
 
   useEffect(() => {
     if (code) {
       fetchProduct(code);
     }
-  }, [code]);
+
+    if (mealType) {
+      setSelectedMeal(mealType); // Set selected meal from query parameter
+    }
+  }, [code, mealType]);
 
   const fetchProduct = async (barcode) => {
     try {
@@ -38,8 +47,24 @@ const ProductPage = () => {
   };
 
   const handleAddToMeal = () => {
-    // Logic for adding to meal goes here
-    console.log('Added to meal:', product);
+    if (product) {
+      // Prepare product with adjusted nutrition values
+      const adjustedProduct = {
+        ...product,
+        nutriments: {
+          'energy-kcal_100g': product.nutriments['energy-kcal_100g'] * (quantity / 100),
+          fat_100g: product.nutriments.fat_100g * (quantity / 100),
+          'saturated-fat_100g': product.nutriments['saturated-fat_100g'] * (quantity / 100),
+          carbohydrates_100g: product.nutriments.carbohydrates_100g * (quantity / 100),
+          proteins_100g: product.nutriments.proteins_100g * (quantity / 100),
+          sodium_100g: product.nutriments.sodium_100g * (quantity / 100),
+          sugars_100g: product.nutriments.sugars_100g * (quantity / 100),
+        },
+      };
+      console.log(adjustedProduct)
+      addFoodToMeal(selectedMeal, adjustedProduct); // Add the product to the selected meal
+      router.push('/'); // Optionally, navigate back to the home page after adding
+    }
   };
 
   if (loading) {
@@ -59,18 +84,18 @@ const ProductPage = () => {
 
   // Destructure the product nutriments per 100g
   const {
-    'energy-kcal_100g': energyKcal100g, // Energy in kJ per 100g
-    fat_100g,                           // Total fat per 100g
-    'saturated-fat_100g': saturated_fat_100g, // Saturated fat per 100g
-    carbohydrates_100g,                 // Total carbohydrates per 100g
-    sugars_100g,                        // Sugars per 100g
-    fiber_100g,                         // Dietary fiber per 100g
-    proteins_100g,                      // Proteins per 100g
-    sodium_100g                         // Sodium per 100g
+    'energy-kcal_100g': energyKcal100g,
+    fat_100g,
+    'saturated-fat_100g': saturated_fat_100g,
+    carbohydrates_100g,
+    sugars_100g,
+    fiber_100g,
+    proteins_100g,
+    sodium_100g,
   } = product.nutriments || {};
 
   // Function to round to 2 significant digits
-  const formatValue = (value) => value ? Number(value).toFixed(2) : null;
+  const formatValue = (value) => (value ? Number(value).toFixed(2) : null);
 
   return (
     <div style={{ textAlign: 'center' }}>
@@ -79,15 +104,39 @@ const ProductPage = () => {
       {/* Display Nutrition Information */}
       <h2>Nutrition Information (per 100g)</h2>
       <ul style={{ listStyleType: 'none', padding: 0 }}>
-        {energyKcal100g && <li><strong>Calories:</strong> {formatValue(energyKcal100g)} kcal</li>}
-        {fat_100g && <li><strong>Fat:</strong> {formatValue(fat_100g)} g</li>}
-        {saturated_fat_100g && <li><strong>Saturated Fat:</strong> {formatValue(saturated_fat_100g)} g</li>}
-        {fiber_100g && <li><strong>Fiber:</strong> {formatValue(fiber_100g)} g</li>}
-        {carbohydrates_100g && <li><strong>Carbohydrates:</strong> {formatValue(carbohydrates_100g)} g</li>}
-        {proteins_100g && <li><strong>Proteins:</strong> {formatValue(proteins_100g)} g</li>}
-        {sodium_100g && <li><strong>Sodium:</strong> {formatValue(sodium_100g)} g</li>}
-        {sugars_100g && <li><strong>Sugars:</strong> {formatValue(sugars_100g)} g</li>}
+        <li><strong>Calories:</strong> {energyKcal100g ? formatValue(energyKcal100g) : "0"} kcal</li>
+        <li><strong>Fat:</strong> {fat_100g ? formatValue(fat_100g) : "0"} g</li>
+        <li><strong>Saturated Fat:</strong> {saturated_fat_100g ? formatValue(saturated_fat_100g) : "0"} g</li>
+        <li><strong>Fiber:</strong> {fiber_100g ? formatValue(fiber_100g) : "0"} g</li>
+        <li><strong>Carbohydrates:</strong> {carbohydrates_100g ? formatValue(carbohydrates_100g) : "0"} g</li>
+        <li><strong>Proteins:</strong> {proteins_100g ? formatValue(proteins_100g) : "0"} g</li>
+        <li><strong>Sodium:</strong> {sodium_100g ? formatValue(sodium_100g) : "0"} g</li>
+        <li><strong>Sugars:</strong> {sugars_100g ? formatValue(sugars_100g) : "0"} g</li>
       </ul>
+
+      {/* Quantity Input */}
+      <div style={{ marginTop: '20px' }}>
+        <label htmlFor="quantity" style={{ marginRight: '10px' }}>Quantity in grams:</label>
+        <input
+          type="number"
+          id="quantity"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
+          style={{ padding: '10px', marginBottom: '20px', width: '80px' }}
+          min="1"
+        />
+      </div>
+
+      {/* Meal Selection */}
+      <div style={{ marginTop: '20px' }}>
+        <label htmlFor="meal-select" style={{ marginRight: '10px' }}>Select Meal:</label>
+        <select id="meal-select" value={selectedMeal} onChange={(e) => setSelectedMeal(e.target.value)}>
+          <option value="Breakfast">Breakfast</option>
+          <option value="Lunch">Lunch</option>
+          <option value="Dinner">Dinner</option>
+          <option value="Snacks">Snacks</option>
+        </select>
+      </div>
 
       {/* Buttons for navigation */}
       <div style={{ marginTop: '20px' }}>

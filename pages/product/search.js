@@ -1,7 +1,8 @@
 // pages/product/search.js
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import { useRouter } from 'next/router';
 import Quagga from 'quagga';
+import { MealsContext } from '../../context/MealsContext'; // Import MealsContext
 
 const Search = () => {
   const [barcode, setBarcode] = useState('');
@@ -16,10 +17,37 @@ const Search = () => {
   const router = useRouter();
   const streamRef = useRef(null);
   const [yieldValue, setYieldValue] = useState(1);
+  const [selectedMeal, setSelectedMeal] = useState(router.query.mealType || 'Breakfast'); // Set default meal type from query
+  const { addFoodToMeal } = useContext(MealsContext); // Use context to get addFoodToMeal
+
+  const handleAddRecipe = (recipe) => {
+    if (recipe) {
+      const recipeToAdd = {
+        product_name: recipe.label,
+        nutriments:{
+        'energy-kcal_100g': recipe.calories,
+        fat_100g: recipe.totalNutrients?.FAT?.quantity,
+        'saturated-fat_100g': recipe.totalNutrients?.FASAT?.quantity,
+        carbohydrates_100g: recipe.totalNutrients?.CHOCDF?.quantity,
+        proteins_100g: recipe.totalNutrients?.PROCNT?.quantity,
+        sodium_100g: recipe.totalNutrients?.NA?.quantity,
+        sugars_100g: recipe.totalNutrients?.SUGAR?.quantity,
+        mealType: selectedMeal, // Add meal type here
+        }
+      };
+      // Save the recipe to local storage
+      localStorage.setItem('addedRecipe', JSON.stringify(recipeToAdd));
+      addFoodToMeal(selectedMeal,recipeToAdd); // Add recipe to context
+      router.push('/'); // Redirect back to index.js
+      console.log('Recipe added:', recipeToAdd); // For debugging
+    } else {
+      console.error('No recipe to add'); // Log if no recipe is available
+    }
+  };
 
   const handleBarcodeSubmit = () => {
     if (barcode) {
-      router.push(`/product/barcode?code=${barcode}`);
+      router.push(`/product/barcode?code=${barcode}&mealType=${selectedMeal}`); // Pass meal type
     }
   };
 
@@ -128,7 +156,7 @@ const Search = () => {
               streamRef.current.getTracks().forEach(track => track.stop());
             }
             setCameraActive(false);
-            router.push(`/product/barcode?code=${scannedCode}`);
+            router.push(`/product/barcode?code=${scannedCode}&mealType=${selectedMeal}`); // Pass meal type
           }
         });
       }
@@ -215,7 +243,7 @@ const Search = () => {
 
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
         <button onClick={handleUserRecipeSubmit} style={{ padding: '10px 20px' }}>
-          Submit Recipe
+          Submit MyRecipe
         </button>
       </div>
 
@@ -227,45 +255,50 @@ const Search = () => {
             <div>
               <p><strong>Calories:</strong> {(nutritionResults.calories / yieldValue).toFixed(2)}</p>
               <p><strong>Fat:</strong> {(nutritionResults.totalNutrients?.FAT?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.FAT?.unit}</p>
+              <p><strong>Saturated Fat:</strong> {(nutritionResults.totalNutrients?.FASAT?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.FASAT?.unit}</p>
               <p><strong>Fiber:</strong> {(nutritionResults.totalNutrients?.FIBTG?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.FIBTG?.unit}</p>
               <p><strong>Carbohydrates:</strong> {(nutritionResults.totalNutrients?.CHOCDF?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.CHOCDF?.unit}</p>
               <p><strong>Protein:</strong> {(nutritionResults.totalNutrients?.PROCNT?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.PROCNT?.unit}</p>
               <p><strong>Sodium:</strong> {(nutritionResults.totalNutrients?.NA?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.NA?.unit}</p>
               <p><strong>Sugar:</strong> {(nutritionResults.totalNutrients?.SUGAR?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.SUGAR?.unit}</p>
             </div>
+            <button onClick={() => handleAddRecipe(recipe)} style={{ padding: '10px 20px', marginTop: '10px' }}>
+                    Add My Recipe
+                  </button>
           </div>
         </div>
       )}
 
-      {recipePopupVisible && (
+{recipePopupVisible && (
         <div className="popup" onClick={handlePopupClose} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1000 }}>
           <div className="popup-content" onClick={e => e.stopPropagation()} style={{ background: '#fff', margin: 'auto', padding: '20px', borderRadius: '5px', width: '80%', maxWidth: '500px', height: 'auto', overflowY: 'scroll', position: 'relative', top: '50%', transform: 'translateY(-50%)' }}>
             <h2>Recipes</h2>
             <button onClick={handlePopupClose} style={{ position: 'absolute', top: '10px', right: '10px' }}>Close</button>
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              {recipes.map((recipe, index) => {
-                const servings = recipe.yield || 1; // Get yield from API
-
-                return (
-                  <div key={index} style={{ marginBottom: '15px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-                    <h3>{recipe.label}</h3>
-                    <img src={recipe.image} alt={recipe.label} style={{ display: 'block', margin: '0 auto', width: '50%', height: 'auto', marginBottom: '10px' }} />
-                    <p><strong>Calories:</strong> {(recipe.calories / servings).toFixed(2)}</p>
-                    <p><strong>Fat:</strong> {recipe.totalNutrients?.FAT?.quantity ? (recipe.totalNutrients.FAT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.FAT?.unit}</p>
-                    <p><strong>Fiber:</strong> {recipe.totalNutrients?.FIBTG?.quantity ? (recipe.totalNutrients.FIBTG.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.FIBTG?.unit}</p>
-                    <p><strong>Carbohydrates:</strong> {recipe.totalNutrients?.CHOCDF?.quantity ? (recipe.totalNutrients.CHOCDF.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.CHOCDF?.unit}</p>
-                    <p><strong>Protein:</strong> {recipe.totalNutrients?.PROCNT?.quantity ? (recipe.totalNutrients.PROCNT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.PROCNT?.unit}</p>
-                    <p><strong>Sodium:</strong> {recipe.totalNutrients?.NA?.quantity ? (recipe.totalNutrients.NA.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.NA?.unit}</p>
-                    <p><strong>Sugar:</strong> {recipe.totalNutrients?.SUGAR?.quantity ? (recipe.totalNutrients.SUGAR.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.SUGAR?.unit}</p>
-                  </div>
-                );
-              })}
+              {recipes.map((recipe, index) => (
+                <div key={index} style={{ marginBottom: '15px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
+                  <h3>{recipe.label}</h3>
+                  <p><strong>Calories:</strong> {recipe.calories}</p>
+                  <p><strong>Fat:</strong> {recipe.totalNutrients?.FAT?.quantity} {recipe.totalNutrients?.FAT?.unit}</p>
+                  <p><strong>Saturated Fat:</strong> {recipe.totalNutrients?.FASAT?.quantity} {recipe.totalNutrients?.FASAT?.unit}</p>
+                  <p><strong>Fiber:</strong> {recipe.totalNutrients?.FIBTG?.quantity} {recipe.totalNutrients?.FIBTG?.unit}</p>
+                  <p><strong>Carbohydrates:</strong> {recipe.totalNutrients?.CHOCDF?.quantity} {recipe.totalNutrients?.CHOCDF?.unit}</p>
+                  <p><strong>Protein:</strong> {recipe.totalNutrients?.PROCNT?.quantity} {recipe.totalNutrients?.PROCNT?.unit}</p>
+                  <p><strong>Sodium:</strong> {recipe.totalNutrients?.NA?.quantity} {recipe.totalNutrients?.NA?.unit}</p>
+                  <p><strong>Sugar:</strong> {recipe.totalNutrients?.SUGAR?.quantity} {recipe.totalNutrients?.SUGAR?.unit}</p>
+                  <button onClick={() => handleAddRecipe(recipe)} style={{ padding: '10px 20px', marginTop: '10px' }}>
+                    Add Recipe
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
     </div>
   );
+
 };
 
 export default Search;
+
