@@ -127,17 +127,6 @@ const ProductPage = () => {
         />
       </div>
 
-      {/* Meal Selection */}
-      <div style={{ marginTop: '20px' }}>
-        <label htmlFor="meal-select" style={{ marginRight: '10px' }}>Select Meal:</label>
-        <select id="meal-select" value={selectedMeal} onChange={(e) => setSelectedMeal(e.target.value)}>
-          <option value="Breakfast">Breakfast</option>
-          <option value="Lunch">Lunch</option>
-          <option value="Dinner">Dinner</option>
-          <option value="Snacks">Snacks</option>
-        </select>
-      </div>
-
       {/* Buttons for navigation */}
       <div style={{ marginTop: '20px' }}>
         <button onClick={handleBackToSearch} style={{ padding: '10px 20px', marginRight: '10px' }}>

@@ -19,6 +19,7 @@ const Search = () => {
   const [yieldValue, setYieldValue] = useState(1);
   const [selectedMeal, setSelectedMeal] = useState(router.query.mealType || 'Breakfast'); // Set default meal type from query
   const { addFoodToMeal } = useContext(MealsContext); // Use context to get addFoodToMeal
+  const {mealType } = router.query; 
 
   const handleAddRecipe = (recipe) => {
     if (recipe) {
@@ -161,7 +162,9 @@ const Search = () => {
         });
       }
     }
-
+    if (mealType) {
+      setSelectedMeal(mealType); // Set selected meal from query parameter
+    }
     return () => {
       if (Quagga && Quagga.initialized) {
         try {
@@ -174,7 +177,7 @@ const Search = () => {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
-  }, [cameraActive]);
+  }, [cameraActive, mealType]);
 
   return (
     <div style={{ textAlign: 'center' }}>

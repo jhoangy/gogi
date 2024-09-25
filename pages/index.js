@@ -1,11 +1,11 @@
 // pages/index.js
 import { useRouter } from 'next/router';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { MealsContext } from '../context/MealsContext'; // Importing context
 
 const Home = () => {
   const router = useRouter();
-  const { meals, dailyNutrition, addMealItem, addRecipeItem } = useContext(MealsContext); // Get meals and dailyNutrition from context
+  const { meals, dailyNutrition, addMealItem } = useContext(MealsContext); // Get meals and dailyNutrition from context
   const [storedRecipes, setStoredRecipes] = useState({ Breakfast: [], Lunch: [], Dinner: [], Snacks: [] });
 
   const handleAddFood = (mealType) => {
