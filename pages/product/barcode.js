@@ -9,7 +9,6 @@ const ProductPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [showDebug, setShowDebug] = useState(false); // State to toggle debug view
   const [selectedMeal, setSelectedMeal] = useState('Breakfast'); // Default meal type
   const [quantity, setQuantity] = useState(100); // Default quantity in grams
 
@@ -42,10 +41,6 @@ const ProductPage = () => {
     }
   };
 
-  const handleBackToSearch = () => {
-    router.push('/product/search'); // Navigate back to the search page
-  };
-
   const handleAddToMeal = () => {
     if (product) {
       // Prepare product with adjusted nutrition values
@@ -75,9 +70,6 @@ const ProductPage = () => {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
         <p>Product not found.</p>
-        <button onClick={handleBackToSearch} style={{ marginTop: '20px', padding: '10px 20px' }}>
-          Back to Search
-        </button>
       </div>
     );
   }
@@ -128,27 +120,10 @@ const ProductPage = () => {
       </div>
 
       {/* Buttons for navigation */}
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={handleBackToSearch} style={{ padding: '10px 20px', marginRight: '10px' }}>
-          Back to Search
-        </button>
+      <div style={{ marginTop: '0px', marginBottom: "20px"}}>
         <button onClick={handleAddToMeal} style={{ padding: '10px 20px' }}>
           Add to Meal
         </button>
-      </div>
-
-      {/* Debugging Toggle */}
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={() => setShowDebug(!showDebug)} style={{ padding: '10px 20px' }}>
-          {showDebug ? 'Hide API Info' : 'Show API Info'}
-        </button>
-
-        {showDebug && (
-          <div style={{ marginTop: '10px', border: '1px solid #ccc', padding: '10px' }}>
-            <h3>API Information</h3>
-            <pre>{JSON.stringify(product, null, 2)}</pre>
-          </div>
-        )}
       </div>
     </div>
   );

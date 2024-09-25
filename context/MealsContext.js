@@ -31,6 +31,13 @@ export const MealsProvider = ({ children }) => {
     updateDailyNutrition(product);
   };
 
+  const updateMeals = (mealType, curMeals) => {
+    setMeals((prevMeals) => ({
+        ...prevMeals,
+        [mealType]: curMeals,
+      }));
+  };
+
   const addRecipeItem = (recipe) => {
     setRecipes((prevRecipes) => [...prevRecipes, recipe]);
   };
@@ -47,18 +54,18 @@ export const MealsProvider = ({ children }) => {
     } = product.nutriments || {};
 
     setDailyNutrition((prevNutrition) => ({
-      calories: prevNutrition.calories + (energyKcal100g ? Number(energyKcal100g) : 0),
-      fat: prevNutrition.fat + (fat_100g ? Number(fat_100g) : 0),
-      saturatedFat: prevNutrition.saturatedFat + (saturatedFat100g ? Number(saturatedFat100g) : 0),
-      carbohydrates: prevNutrition.carbohydrates + (carbohydrates_100g ? Number(carbohydrates_100g) : 0),
-      proteins: prevNutrition.proteins + (proteins_100g ? Number(proteins_100g) : 0),
-      sodium: prevNutrition.sodium + (sodium_100g ? Number(sodium_100g) : 0),
-      sugars: prevNutrition.sugars + (sugars_100g ? Number(sugars_100g) : 0),
-    }));
+    calories: Math.max(0, prevNutrition.calories + (energyKcal100g ? Number(energyKcal100g) : 0)),
+    fat: Math.max(0, prevNutrition.fat + (fat_100g ? Number(fat_100g) : 0)),
+    saturatedFat: Math.max(0, prevNutrition.saturatedFat + (saturatedFat100g ? Number(saturatedFat100g) : 0)),
+    carbohydrates: Math.max(0, prevNutrition.carbohydrates + (carbohydrates_100g ? Number(carbohydrates_100g) : 0)),
+    proteins: Math.max(0, prevNutrition.proteins + (proteins_100g ? Number(proteins_100g) : 0)),
+    sodium: Math.max(0, prevNutrition.sodium + (sodium_100g ? Number(sodium_100g) : 0)),
+    sugars: Math.max(0, prevNutrition.sugars + (sugars_100g ? Number(sugars_100g) : 0)),
+  }));
   };
 
   return (
-    <MealsContext.Provider value={{ meals, recipes, dailyNutrition, addFoodToMeal, addRecipeItem }}>
+    <MealsContext.Provider value={{ meals, recipes, dailyNutrition, addFoodToMeal, addRecipeItem, updateDailyNutrition, updateMeals }}>
       {children}
     </MealsContext.Provider>
   );

@@ -21,11 +21,10 @@ const Search = () => {
   const { addFoodToMeal } = useContext(MealsContext); // Use context to get addFoodToMeal
   const {mealType } = router.query; 
 
-  const handleAddRecipe = (recipe) => {
+  const handleAddRecipe = (recipe, servings) => {
     if (recipe) {
-      const servings = recipe.yield || 1;
       const recipeToAdd = {
-        product_name: recipe.label,
+        product_name: recipe.label ?? "My Recipe",
         nutriments:{
         'energy-kcal_100g': (recipe.calories/ servings).toFixed(2), 
         fat_100g: (recipe.totalNutrients?.FAT?.quantity/ servings).toFixed(2),
@@ -37,6 +36,7 @@ const Search = () => {
         mealType: selectedMeal, // Add meal type here
         }
       };
+      console.log(recipe);
       // Save the recipe to local storage
       localStorage.setItem('addedRecipe', JSON.stringify(recipeToAdd));
       addFoodToMeal(selectedMeal,recipeToAdd); // Add recipe to context
@@ -266,7 +266,7 @@ const Search = () => {
               <p><strong>Sodium:</strong> {(nutritionResults.totalNutrients?.NA?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.NA?.unit}</p>
               <p><strong>Sugar:</strong> {(nutritionResults.totalNutrients?.SUGAR?.quantity / yieldValue).toFixed(2)} {nutritionResults.totalNutrients?.SUGAR?.unit}</p>
             </div>
-            <button onClick={() => handleAddRecipe(recipe)} style={{ padding: '10px 20px', marginTop: '10px' }}>
+            <button onClick={() => handleAddRecipe(nutritionResults,yieldValue)} style={{ padding: '10px 20px', marginTop: '10px' }}>
                     Add My Recipe
                   </button>
           </div>
@@ -293,7 +293,7 @@ const Search = () => {
                     <p><strong>Protein:</strong> {recipe.totalNutrients?.PROCNT?.quantity ? (recipe.totalNutrients.PROCNT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.PROCNT?.unit}</p>
                     <p><strong>Sodium:</strong> {recipe.totalNutrients?.NA?.quantity ? (recipe.totalNutrients.NA.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.NA?.unit}</p>
                     <p><strong>Sugar:</strong> {recipe.totalNutrients?.SUGAR?.quantity ? (recipe.totalNutrients.SUGAR.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.SUGAR?.unit}</p>
-                    <button onClick={() => handleAddRecipe(recipe)} style={{ padding: '10px 20px', marginTop: '10px' }}>
+                    <button onClick={() => handleAddRecipe(recipe,servings)} style={{ padding: '10px 20px', marginTop: '10px' }}>
                     Add Recipe
                   </button>
                   </div>

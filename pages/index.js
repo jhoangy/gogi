@@ -5,65 +5,37 @@ import { MealsContext } from '../context/MealsContext'; // Importing context
 
 const Home = () => {
   const router = useRouter();
-  const { meals, dailyNutrition, addMealItem } = useContext(MealsContext); // Get meals and dailyNutrition from context
-  const [storedRecipes, setStoredRecipes] = useState({ Breakfast: [], Lunch: [], Dinner: [], Snacks: [] });
+  const { meals, dailyNutrition, updateDailyNutrition, updateMeals } = useContext(MealsContext); // Get meals and dailyNutrition from context
+  const [storedRecipes] = useState({ Breakfast: [], Lunch: [], Dinner: [], Snacks: [] });
 
   const handleAddFood = (mealType) => {
     router.push(`/product/search?mealType=${mealType}`); // Pass meal type to barcode scanner page
   };
 
-  const handleRemoveFood = (mealType, item) => {
-    // Logic for removing food item from meal
-    addMealItem(mealType, item, false);
-    updateDailyNutrition(); // Update daily nutrition when removing
-  };
-
-  const handleRemoveRecipe = (mealType, recipe) => {
-    const updatedRecipes = storedRecipes[mealType].filter(r => r.name !== recipe.name);
-    setStoredRecipes(prev => ({ ...prev, [mealType]: updatedRecipes }));
-    updateDailyNutrition(); // Update daily nutrition when removing recipe
-  };
-
-  const updateDailyNutrition = () => {
-    const newNutrition = {
-      calories: 0,
-      fat: 0,
-      saturatedFat: 0,
-      carbohydrates: 0,
-      proteins: 0,
-      sodium: 0,
-      sugars: 0,
+  const handleRemoveFood = (mealType, index) => {
+    // Remove the food item at the specific index in the meal array
+    const updatedMealItems = meals[mealType]; // Copy the current meal items
+    const removedMeal = updatedMealItems[index];
+    updatedMealItems.splice(index, 1); // Remove the item at the given index
+    console.log(updatedMealItems);
+    // Update the meals context by removing the item from the specified meal type
+    updateMeals(mealType, updatedMealItems);
+    
+      // Create a new object with negative nutritional values for the removed meal
+    const negativeNutrition = {
+      nutriments:{
+      'energy-kcal_100g': -(removedMeal.nutriments['energy-kcal_100g'] || 0),
+      fat_100g: -(removedMeal.nutriments.fat_100g || 0),
+      'saturated-fat_100g': -(removedMeal.nutriments['saturated-fat_100g'] || 0),
+      carbohydrates_100g: -(removedMeal.nutriments.carbohydrates_100g || 0),
+      proteins_100g: -(removedMeal.nutriments.proteins_100g || 0),
+      sodium_100g: -(removedMeal.nutriments.sodium_100g || 0),
+      sugars_100g: -(removedMeal.nutriments.sugars_100g || 0),
+      }
     };
 
-    // Calculate nutrition from meals
-    Object.values(meals).forEach(mealItems => {
-      mealItems.forEach(item => {
-        newNutrition.calories += item.calories || 0;
-        newNutrition.fat += item.fat || 0;
-        newNutrition.saturatedFat += item.saturatedFat || 0;
-        newNutrition.carbohydrates += item.carbohydrates || 0;
-        newNutrition.proteins += item.proteins || 0;
-        newNutrition.sodium += item.sodium || 0;
-        newNutrition.sugars += item.sugars || 0;
-      });
-    });
-
-    // Calculate nutrition from recipes
-    Object.keys(storedRecipes).forEach(mealType => {
-      storedRecipes[mealType].forEach(recipe => {
-        newNutrition.calories += recipe.nutrients.calories || 0;
-        newNutrition.fat += recipe.nutrients.fat || 0;
-        newNutrition.saturatedFat += recipe.nutrients.saturatedFat || 0;
-        newNutrition.carbohydrates += recipe.nutrients.carbohydrates || 0;
-        newNutrition.proteins += recipe.nutrients.proteins || 0;
-        newNutrition.sodium += recipe.nutrients.sodium || 0;
-        newNutrition.sugars += recipe.nutrients.sugars || 0;
-      });
-    });
-
-    // Update daily nutrition state (assuming you have a function to do this)
-    // This function needs to be implemented in the context or handled here
-    // Example: updateDailyNutritionState(newNutrition);
+    // Update daily nutrition after removing the food item
+    updateDailyNutrition(negativeNutrition);
   };
 
   return (
@@ -128,7 +100,7 @@ const Home = () => {
                 {meals[mealType]?.map((item, index) => (
                   <li key={index}>
                     {item.product_name}
-                    <button onClick={() => handleRemoveFood(mealType, item)} style={{ marginLeft: '10px', cursor: 'pointer' }}>
+                    <button onClick={() => handleRemoveFood(mealType, index)} style={{ marginLeft: '10px', cursor: 'pointer' }}>
                       Remove
                     </button>
                   </li>
