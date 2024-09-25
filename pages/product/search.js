@@ -23,16 +23,17 @@ const Search = () => {
 
   const handleAddRecipe = (recipe) => {
     if (recipe) {
+      const servings = recipe.yield || 1;
       const recipeToAdd = {
         product_name: recipe.label,
         nutriments:{
-        'energy-kcal_100g': recipe.calories,
-        fat_100g: recipe.totalNutrients?.FAT?.quantity,
-        'saturated-fat_100g': recipe.totalNutrients?.FASAT?.quantity,
-        carbohydrates_100g: recipe.totalNutrients?.CHOCDF?.quantity,
-        proteins_100g: recipe.totalNutrients?.PROCNT?.quantity,
-        sodium_100g: recipe.totalNutrients?.NA?.quantity,
-        sugars_100g: recipe.totalNutrients?.SUGAR?.quantity,
+        'energy-kcal_100g': (recipe.calories/ servings).toFixed(2), 
+        fat_100g: (recipe.totalNutrients?.FAT?.quantity/ servings).toFixed(2),
+        'saturated-fat_100g': (recipe.totalNutrients?.FASAT?.quantity/ servings).toFixed(2),
+        carbohydrates_100g: (recipe.totalNutrients?.CHOCDF?.quantity/ servings).toFixed(2),
+        proteins_100g: (recipe.totalNutrients?.PROCNT?.quantity/ servings).toFixed(2),
+        sodium_100g: (recipe.totalNutrients?.NA?.quantity/ servings).toFixed(2),
+        sugars_100g: (recipe.totalNutrients?.SUGAR?.quantity/ servings).toFixed(2),
         mealType: selectedMeal, // Add meal type here
         }
       };
@@ -278,22 +279,27 @@ const Search = () => {
             <h2>Recipes</h2>
             <button onClick={handlePopupClose} style={{ position: 'absolute', top: '10px', right: '10px' }}>Close</button>
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              {recipes.map((recipe, index) => (
-                <div key={index} style={{ marginBottom: '15px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-                  <h3>{recipe.label}</h3>
-                  <p><strong>Calories:</strong> {recipe.calories}</p>
-                  <p><strong>Fat:</strong> {recipe.totalNutrients?.FAT?.quantity} {recipe.totalNutrients?.FAT?.unit}</p>
-                  <p><strong>Saturated Fat:</strong> {recipe.totalNutrients?.FASAT?.quantity} {recipe.totalNutrients?.FASAT?.unit}</p>
-                  <p><strong>Fiber:</strong> {recipe.totalNutrients?.FIBTG?.quantity} {recipe.totalNutrients?.FIBTG?.unit}</p>
-                  <p><strong>Carbohydrates:</strong> {recipe.totalNutrients?.CHOCDF?.quantity} {recipe.totalNutrients?.CHOCDF?.unit}</p>
-                  <p><strong>Protein:</strong> {recipe.totalNutrients?.PROCNT?.quantity} {recipe.totalNutrients?.PROCNT?.unit}</p>
-                  <p><strong>Sodium:</strong> {recipe.totalNutrients?.NA?.quantity} {recipe.totalNutrients?.NA?.unit}</p>
-                  <p><strong>Sugar:</strong> {recipe.totalNutrients?.SUGAR?.quantity} {recipe.totalNutrients?.SUGAR?.unit}</p>
-                  <button onClick={() => handleAddRecipe(recipe)} style={{ padding: '10px 20px', marginTop: '10px' }}>
+            {recipes.map((recipe, index) => {
+                const servings = recipe.yield || 1; // Get yield from API
+
+                return (
+                  <div key={index} style={{ marginBottom: '15px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
+                    <h3>{recipe.label}</h3>
+                    <p><strong>Calories:</strong> {(recipe.calories / servings).toFixed(2)}</p>
+                    <p><strong>Fat:</strong> {recipe.totalNutrients?.FAT?.quantity ? (recipe.totalNutrients.FAT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.FAT?.unit}</p>
+                    <p><strong>Saturated Fat:</strong> {recipe.totalNutrients?.FASAT?.quantity ? (recipe.totalNutrients.FASAT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.FASAT?.unit}</p>
+                    <p><strong>Fiber:</strong> {recipe.totalNutrients?.FIBTG?.quantity ? (recipe.totalNutrients.FIBTG.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.FIBTG?.unit}</p>
+                    <p><strong>Carbohydrates:</strong> {recipe.totalNutrients?.CHOCDF?.quantity ? (recipe.totalNutrients.CHOCDF.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.CHOCDF?.unit}</p>
+                    <p><strong>Protein:</strong> {recipe.totalNutrients?.PROCNT?.quantity ? (recipe.totalNutrients.PROCNT.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.PROCNT?.unit}</p>
+                    <p><strong>Sodium:</strong> {recipe.totalNutrients?.NA?.quantity ? (recipe.totalNutrients.NA.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.NA?.unit}</p>
+                    <p><strong>Sugar:</strong> {recipe.totalNutrients?.SUGAR?.quantity ? (recipe.totalNutrients.SUGAR.quantity / servings).toFixed(2) : 'N/A'} {recipe.totalNutrients?.SUGAR?.unit}</p>
+                    <button onClick={() => handleAddRecipe(recipe)} style={{ padding: '10px 20px', marginTop: '10px' }}>
                     Add Recipe
                   </button>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
+
             </div>
           </div>
         </div>

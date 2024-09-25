@@ -86,31 +86,31 @@ const Home = () => {
             <tbody>
               <tr>
                 <td style={{ padding: '8px' }}>Calories</td>
-                <td style={{ textAlign: 'right', padding: '8px' }}>{dailyNutrition.calories} kcal</td>
+                <td style={{ textAlign: 'right', padding: '8px' }}>{(dailyNutrition.calories).toFixed(2)} kcal</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px' }}>Fat</td>
-                <td style={{ textAlign: 'right', padding: '8px' }}>{dailyNutrition.fat}g</td>
+                <td style={{ textAlign: 'right', padding: '8px' }}>{(dailyNutrition.fat).toFixed(2)}g</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px' }}>Saturated Fat</td>
-                <td style={{ textAlign: 'right', padding: '8px' }}>{dailyNutrition.saturatedFat}g</td>
+                <td style={{ textAlign: 'right', padding: '8px' }}>{(dailyNutrition.saturatedFat).toFixed(2)}g</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px' }}>Carbohydrates</td>
-                <td style={{ textAlign: 'right', padding: '8px' }}>{dailyNutrition.carbohydrates}g</td>
+                <td style={{ textAlign: 'right', padding: '8px' }}>{(dailyNutrition.carbohydrates).toFixed(2)}g</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px' }}>Protein</td>
-                <td style={{ textAlign: 'right', padding: '8px' }}>{dailyNutrition.proteins}g</td>
+                <td style={{ textAlign: 'right', padding: '8px' }}>{(dailyNutrition.proteins).toFixed(2)}g</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px' }}>Sodium</td>
-                <td style={{ textAlign: 'right', padding: '8px' }}>{dailyNutrition.sodium}mg</td>
+                <td style={{ textAlign: 'right', padding: '8px' }}>{(dailyNutrition.sodium).toFixed(2)}mg</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px' }}>Sugar</td>
-                <td style={{ textAlign: 'right', padding: '8px' }}>{dailyNutrition.sugars}g</td>
+                <td style={{ textAlign: 'right', padding: '8px' }}>{(dailyNutrition.sugars).toFixed(2)}g</td>
               </tr>
             </tbody>
           </table>
