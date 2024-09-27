@@ -81,8 +81,13 @@ const Search = () => {
       }
 
       try {
-        console.log("Ingredients: search", ingredients);
-        const response = await fetch(`/api/nutritionAPI?query=${ingredients}`);
+        const response = await fetch('/api/nutritionAPI', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ingredients }),
+        });
 
         if (!response.ok) {
           const errorData = await response.json();
