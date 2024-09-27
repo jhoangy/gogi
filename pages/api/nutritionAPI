@@ -3,6 +3,14 @@ export default async function handler(req, res) {
   const nutritionID = process.env.NUTRITION_ID;
   const { ingredients } = req.body;
 
+  if (req.method === 'POST') {
+    // Handle POST request here
+  } else {
+    // Respond with a 405 Method Not Allowed for other methods
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+}
+
   if (!ingredients || ingredients.length === 0) {
     return res.status(400).json({ error: 'No ingredients provided' });
   }
