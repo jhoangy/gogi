@@ -2,7 +2,7 @@
 import { useRouter } from 'next/router';
 import { useContext, useState } from 'react';
 import { MealsContext } from '../context/MealsContext'; // Importing context
-import ScoreTracker from '../components/ScoreTracker/scoretracker'; // Adjusted import path
+import ScoreTracker from '/components/ScoreTracker/scoretracker'; // Adjusted import path
 
 const Home = () => {
   const router = useRouter();
