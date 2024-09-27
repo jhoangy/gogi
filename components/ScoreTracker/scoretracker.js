@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useScore } from '/context/ScoreContext'; // Import the Score Context
-import styles from './ScoreTracker.module.css'; // Import CSS module
+import styles from './scoretracker.module.css'; // Import CSS module
 
 const ScoreTracker = () => {
   const { score, setScore } = useScore(); // Get score and setScore from context
