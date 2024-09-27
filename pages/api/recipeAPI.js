@@ -7,11 +7,11 @@ export default async function handler(req, res) {
   }
   
   try {
-    const apiUrl = await fetch(`https://api.edamam.com/search?q=${query}&app_id=${recipeID}&app_key=${recipeKey}`);
+    const apiUrl = `https://api.edamam.com/search?q=${query}&app_id=${recipeID}&app_key=${recipeKey}`;
     const response = await fetch(apiUrl);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch from Edamam API");
+      throw new Error("Failed to fetch Recipes from Edamam API");
     }
 
     const data = await response.json();
