@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   const nutritionKey = process.env.NUTRITION;
   const nutritionID = process.env.NUTRITION_ID;
-  const { ingredients } = req.query;
+  const { ingredients } = req.body;
 
   if (!ingredients || ingredients.length === 0) {
     return res.status(400).json({ error: 'No ingredients provided' });
