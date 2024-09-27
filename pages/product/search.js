@@ -81,6 +81,7 @@ const Search = () => {
       }
 
       try {
+        console.log("Ingredients: search", ingredients);
         const response = await fetch('/api/nutritionAPI', {
           method: 'POST',
           headers: {
