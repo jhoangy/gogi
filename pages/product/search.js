@@ -57,9 +57,9 @@ const Search = () => {
     if (recipeQuery) {
       try {
         const response = await fetch(`/api/recipeAPI?query=${recipeQuery}`);
+        console.log(response);
         if (!response.ok) throw new Error("Failed to fetch recipes");
         const data = await response.json();
-        console.log(data);
         if (data.hits && data.hits.length > 0) {
           setRecipes(data.hits.map(hit => hit.recipe));
           setRecipePopupVisible(true);
