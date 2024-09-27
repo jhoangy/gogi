@@ -2,6 +2,7 @@
 import { useRouter } from 'next/router';
 import { useContext, useState } from 'react';
 import { MealsContext } from '../context/MealsContext'; // Importing context
+import ScoreTracker from '../components/ScoreTracker/scoretracker'; // Adjusted import path
 
 const Home = () => {
   const router = useRouter();
@@ -123,8 +124,8 @@ const Home = () => {
 
         {/* Right Section: Daily Water Intake */}
         <div style={styles.section}>
-          <h2>Daily Water Intake</h2>
-          <div style={{ width: '100px', height: '100px', backgroundColor: 'red', margin: '0 auto' }}></div>
+          <h2>Daily Water Intake (ML)</h2>
+          <ScoreTracker />
         </div>
       </div>
 

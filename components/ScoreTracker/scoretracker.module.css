@@ -1,0 +1,55 @@
+/* ScoreTracker.module.css */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+  }
+  
+  .h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .input {
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 4px; /* Rounded corners */
+    padding: 5px; /* Padding inside the input */
+    font-size: 16px; /* Font size of the input text */
+    width: 60px; /* Fixed width for the input */
+    text-align: center; /* Center align text inside input */
+    outline: none; /* Remove outline on focus */
+  }
+  
+  .input:focus {
+    border-color: #0070f3; /* Blue border on focus */
+    box-shadow: 0 0 0 2px rgba(0, 112, 255, 0.2); /* Light blue shadow on focus */
+  }
+
+.progressBar {
+    width: 100%; /* Full width of the container */
+    background-color: #e0e0e0; /* Light gray background */
+    border-radius: 4px; /* Rounded corners */
+    height: 20px; /* Height of the progress bar */
+    margin-top: 10px; /* Spacing above the progress bar */
+    overflow: hidden; /* Ensure the progress doesn't overflow */
+  }
+  
+  .progress {
+    height: 100%; /* Full height of the progress bar */
+    background-color: #0070f3; /* Blue color for progress */
+    transition: width 0.3s ease; /* Smooth transition for width change */
+  }
+
+.errorInput {
+    border-color: red; /* Red border for invalid input */
+  }
+  
+  .errorMessage {
+    color: red; /* Red text for error message */
+    font-size: 14px; /* Smaller font size */
+    margin-top: 5px; /* Spacing above the message */
+  }
+  
+  

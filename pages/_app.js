@@ -1,9 +1,12 @@
 import { MealsProvider } from '../context/MealsContext';
+import { ScoreProvider } from '../context/ScoreContext'; // Import the ScoreProvider
 
 function MyApp({ Component, pageProps }) {
   return (
     <MealsProvider>
-      <Component {...pageProps} />
+      <ScoreProvider>
+        <Component {...pageProps} />
+      </ScoreProvider>
     </MealsProvider>
   );
 }
