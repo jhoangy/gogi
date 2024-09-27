@@ -41,7 +41,7 @@ const Home = () => {
 
   return (
     <div style={{ textAlign: 'center' }}>
-      <h1>Product Lookup</h1>
+      <h1>Daily Nutrition Tracker</h1>
 
       {/* Page layout divided into 3 sections: left, middle, and right */}
       <div className="content-container" style={styles.contentContainer}>
