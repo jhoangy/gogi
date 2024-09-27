@@ -56,9 +56,8 @@ const Search = () => {
   const handleRecipeSubmit = async () => {
     if (recipeQuery) {
       try {
-        const response = await fetch(
-          `https://api.edamam.com/search?q=${recipeQuery}&app_id=0114207c&app_key=00ebfc56e4c59d4a49311979e2122efc`
-        );
+        const response = await fetch(`/api/recipeAPI?query=${recipeQuery}`);
+        if (!response.ok) throw new Error("Failed to fetch recipes");
         const data = await response.json();
         console.log(data);
         if (data.hits && data.hits.length > 0) {
@@ -82,16 +81,19 @@ const Search = () => {
       }
 
       try {
-        const response = await fetch(
-          `https://api.edamam.com/api/nutrition-details?app_id=09797d77&app_key=8c815a6c8a44e6929f8918b3794c1440`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ingr: ingredients }),
-          }
-        );
+        const response = await fetch('/api/nutritionAPI', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ingredients }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to calculate nutrition');
+        }
+
         const data = await response.json();
         console.log(data);
         setNutritionResults(data);
