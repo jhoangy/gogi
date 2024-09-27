@@ -82,13 +82,7 @@ const Search = () => {
 
       try {
         console.log("Ingredients: search", ingredients);
-        const response = await fetch('/api/nutritionAPI', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ingredients }),
-        });
+        const response = await fetch(`/api/nutritionAPI?query=${ingredients}`);
 
          // Log the raw response for debugging
   const rawData = await response.text();
