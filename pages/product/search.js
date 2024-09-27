@@ -84,10 +84,6 @@ const Search = () => {
         console.log("Ingredients: search", ingredients);
         const response = await fetch(`/api/nutritionAPI?query=${ingredients}`);
 
-         // Log the raw response for debugging
-  const rawData = await response.text();
-  console.log("Raw Response:", rawData); // Log raw data to see what you received
-
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Failed to calculate nutrition');
