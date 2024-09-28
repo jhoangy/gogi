@@ -14,6 +14,10 @@ const ProductPage = () => {
 
   const { addFoodToMeal } = useContext(MealsContext); // Use context to get addFoodToMeal
 
+  const handleBackToSearch = (mealType) => {
+    router.push(`/product/search?mealType=${mealType}`); // Pass meal type to barcode scanner page
+  };
+
   useEffect(() => {
     if (code) {
       fetchProduct(code);
@@ -70,6 +74,9 @@ const ProductPage = () => {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
         <p>Product not found.</p>
+        <button onClick={handleBackToSearch} >
+
+        </button>
       </div>
     );
   }
