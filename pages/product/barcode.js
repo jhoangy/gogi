@@ -75,7 +75,7 @@ const ProductPage = () => {
       <div style={{ textAlign: 'center', padding: '20px' }}>
         <p>Product not found.</p>
         <button onClick={handleBackToSearch} >
-
+          Back to Search
         </button>
       </div>
     );
