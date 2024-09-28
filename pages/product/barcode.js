@@ -15,7 +15,8 @@ const ProductPage = () => {
   const { addFoodToMeal } = useContext(MealsContext); // Use context to get addFoodToMeal
 
   const handleBackToSearch = (mealType) => {
-    router.push(`/product/search?mealType=${mealType}`); // Pass meal type to barcode scanner page
+    console.log(mealType)
+    router.push(`/product/search?mealType=${selectedMeal}`); // Pass meal type to barcode scanner page
   };
 
   useEffect(() => {
@@ -128,6 +129,9 @@ const ProductPage = () => {
 
       {/* Buttons for navigation */}
       <div style={{ marginTop: '0px', marginBottom: "20px"}}>
+      <button onClick={handleBackToSearch} style={{ padding: '10px 20px' }}>
+          Back to Search
+        </button>
         <button onClick={handleAddToMeal} style={{ padding: '10px 20px' }}>
           Add to Meal
         </button>
